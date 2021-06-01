@@ -35,9 +35,9 @@ namespace LongSorter
                 float multiplier = 5f;
                 int standBy = 0;
                 MethodInfo m = typeof(PlanetGrid).GetMethod("CalcSegmentsAcross");
-                bool pass = true;
                 foreach (var instruction in instructions)
                 {
+                    bool pass = true;
                     if (standBy > 0)
                     {
                         if (instruction.opcode == OpCodes.Ldc_R4 && instruction.operand is float num)
