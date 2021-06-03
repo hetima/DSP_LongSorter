@@ -12,7 +12,7 @@ using UnityEngine.UI;
 
 namespace LongSorter
 {
-    [BepInPlugin(__GUID__, __NAME__, "1.0.0")]
+    [BepInPlugin(__GUID__, __NAME__, "1.1.0")]
     public class LongSorter : BaseUnityPlugin
     {
         public const string __NAME__ = "LongSorter";
