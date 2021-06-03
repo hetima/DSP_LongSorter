@@ -33,33 +33,50 @@ namespace LongSorter
 
             public static IEnumerable<CodeInstruction> CheckBuildConditions_Transpiler(IEnumerable<CodeInstruction> instructions)
             {
-                float multiplier = 5f;
-                int standBy = 0;
-                MethodInfo m = typeof(PlanetGrid).GetMethod("CalcSegmentsAcross");
-                foreach (var instruction in instructions)
+                //if (a > b)
+                //{
+                //    buildPreview.condition = EBuildCondition.TooFar;
+                //}
+                //の b を変更する
+                List<CodeInstruction> ins = instructions.ToList();
+                List<int> patchPos = new List<int>(2);
+
+                FieldInfo f = AccessTools.Field(typeof(BuildPreview), nameof(BuildPreview.condition));
+                MethodInfo m = typeof(LongSorter.Patch).GetMethod("LengthCorrection");
+
+                for (int i = 0; i < ins.Count; i++)
                 {
-                    bool pass = true;
-                    if (standBy > 0)
+                    if (ins[i].opcode == OpCodes.Stfld && ins[i].operand is FieldInfo o && o == f)
                     {
-                        if (instruction.opcode == OpCodes.Ldc_R4 && instruction.operand is float num)
+                        //EBuildCondition.TooFar == 11
+                        if (ins[i - 1].opcode == OpCodes.Ldc_I4_S && ins[i - 1].operand is SByte o2 && o2 == 11
+                            && (ins[i - 3].opcode == OpCodes.Ble_Un || ins[i - 3].opcode == OpCodes.Ble_Un_S))
                         {
-                            if (num > 3f)
+                            patchPos.Add(i - 5);
+                            if (patchPos.Count == 2)
                             {
-                                if (num < 5f) num = 5f;
-                                instruction.operand = num * multiplier;
+                                break;
                             }
                         }
-                        standBy--;
                     }
-                    else if (m != null && instruction.operand is MethodInfo o && o == m)
-                    {
-                        standBy = 56;
-                        m = null;
-                    }
+                }
 
-                    if (pass)
+                for (int i = 0; i < ins.Count; i++)
+                {
+                    if (patchPos.Contains(i))
                     {
-                        yield return instruction;
+                        // ldloc.s
+                        //+1 ldloc.s 対象
+                        //+2 ble.un.s
+                        yield return ins[i];
+                        yield return ins[i + 1];
+                        yield return new CodeInstruction(OpCodes.Call, m);
+                        yield return ins[i + 2];
+                        i += 2;
+                    }
+                    else
+                    {
+                        yield return ins[i];
                     }
                 }
             }
@@ -71,13 +88,13 @@ namespace LongSorter
                 return CheckBuildConditions_Transpiler(instructions);
             }
 
-            [HarmonyTranspiler, HarmonyPatch(typeof(BuildTool_Click), "CheckBuildConditions")]
-            public static IEnumerable<CodeInstruction> BuildTool_Click_Transpiler(IEnumerable<CodeInstruction> instructions)
-            {
-                return CheckBuildConditions_Transpiler(instructions);
-            }
+            //[HarmonyTranspiler, HarmonyPatch(typeof(BuildTool_Click), "CheckBuildConditions")]
+            //public static IEnumerable<CodeInstruction> BuildTool_Click_Transpiler(IEnumerable<CodeInstruction> instructions)
+            //{
+            //}
+            
 
-            //Ldc_R4 と OpCodes.Call の operand は同サイズ(4バイト)なので置き換え可能 メソッドの返り値がスタックに積まれる
+
             [HarmonyTranspiler, HarmonyPatch(typeof(BuildTool_Inserter), "DeterminePreviews")]
             public static IEnumerable<CodeInstruction> BuildTool_Inserter_DeterminePreviews_Transpiler(IEnumerable<CodeInstruction> instructions)
             {
@@ -128,18 +145,28 @@ namespace LongSorter
                 return ins.AsEnumerable();
             }
 
+            public static bool LongMode()
+            {
+                return VFInput.control;
+            }
+
+            public static float LengthCorrection(float val)
+            {
+                return LongMode() ? val * 5f : val;
+            }
+
             //角度なので90とか180とか返しとけば足りそう
             public static float AngleCorrection11()
             {
-                return VFInput.control ? 1000f : 11f;
+                return LongMode() ? 1000f : 11f;
             }
             public static float AngleCorrection14()
             {
-                return VFInput.control ? 1000f : 14f;
+                return LongMode() ? 1000f : 14f;
             }
             public static float AngleCorrection40()
             {
-                return VFInput.control ? 1000f : 40f;
+                return LongMode() ? 1000f : 40f;
             }
         }
 
