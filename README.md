@@ -5,8 +5,20 @@ Mod for Dyson Sphere Program. Needs BepInEx.
 Hold down `Ctrl` key when building the sorter to loosen the length and angle restriction (about up to 5x). The sorters created will continue to work even if this mod is disabled.  
 If the building candidate is too skewed, you can press the `Shift` key at the same time to increase restrictions of the angle and set it straight.
 
+## Known Issue
+If a long sorter is included when copying an object, the length will be reset at the destination, which may result in an unexpected connection state.
+
+---
+
+## 説明
+
 ソーターを設置するときに `Ctrl` キーを押していると、長さや角度の制限を緩めます(約5倍)。作成したソーターはこの mod を無効にしても作動し続けます。  
 建築候補が斜めになって望み通りにできないときは、`Shift` キーも同時に押すと角度の制限を強めて真っ直ぐに設置することができます。
+
+## 既知の問題
+オブジェクトのコピー時に長いソーターが含まれていると、コピー先では長さがリセットされ予期しない接続状態になることがあります。
+
+---
 
 ## Release Notes
 
