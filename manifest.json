@@ -1,7 +1,7 @@
 {
     "name": "LongSorter",
-    "description": "Long Sorter. 長いソーター",
-    "version_number": "1.1.0",
+    "description": "Long and acrobatic sorter. 長いソーター",
+    "version_number": "1.2.0",
     "dependencies": [],
     "website_url": "https://github.com/hetima/DSP_LongSorter"
 }
