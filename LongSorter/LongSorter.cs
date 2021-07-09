@@ -37,7 +37,8 @@ namespace LongSorter
                 //{
                 //    buildPreview.condition = EBuildCondition.TooFar;
                 //}
-                //の b を変更する
+                //の b を変更する 2箇所ある
+                //Psotfixでもいいけど、その場で変更しないと衝突判定がスルーされる
                 List<CodeInstruction> ins = instructions.ToList();
                 List<int> patchPos = new List<int>(2);
 
@@ -145,6 +146,66 @@ namespace LongSorter
                 return ins.AsEnumerable();
             }
 
+            [HarmonyPostfix, HarmonyPatch(typeof(BuildTool_Inserter), "CheckBuildConditions")]
+            public static void BuildTool_Inserter_CheckBuildConditions_Postfix(BuildTool_Inserter __instance, ref bool __result)
+            {
+                if (!__result && LongMode() && __instance.buildPreviews.Count == 1)
+                {
+                    BuildPreview buildPreview = __instance.buildPreviews[0];
+                    if (buildPreview.condition == EBuildCondition.Collide)
+                    {
+                        //ベルトの衝突は無視
+                        if (canIgnoreCollide(__instance, buildPreview))
+                        {
+                            __result = true;
+                        }
+                    }
+                    else if (buildPreview.condition == EBuildCondition.TooClose)
+                    {
+                        //真上に接続 (ついでに近すぎる建物間の接続判定も緩くなる)
+                        float distance = Vector3.Distance(buildPreview.lpos, buildPreview.lpos2);
+                        if (distance > PlanetGrid.kAltGrid - 0.2)
+                        {
+                            __result = true;
+                        }
+                    }
+
+                    if (__result)
+                    {
+                        buildPreview.condition = EBuildCondition.Ok;
+                        __instance.actionBuild.model.cursorText = buildPreview.conditionText;
+                        __instance.actionBuild.model.cursorState = 0;
+                        if (!VFInput.onGUI)
+                        {
+                            UICursor.SetCursor(ECursor.Default);
+                        }
+                    }
+                }
+            }
+
+            public static bool canIgnoreCollide(BuildTool_Inserter tool, BuildPreview buildPreview)
+            {
+                if (buildPreview.desc.hasBuildCollider)
+                {
+                    for (int i = 0; i < BuildToolAccess.TmpColsLength(); i++)
+                    {
+                        Collider collider = BuildToolAccess.TmpCols()[i];
+                        ColliderData colliderData;
+                        if (tool.planet.physics.GetColliderData(collider, out colliderData) && colliderData.objType == EObjectType.Entity)
+                        {
+                            int eid = colliderData.objId;
+                            EntityData e = tool.planet.factory.entityPool[eid];
+                            if (e.beltId <= 0)
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                    return true;
+                }
+                return false;
+            }
+
             public static bool LongMode()
             {
                 return VFInput.control;
@@ -166,10 +227,35 @@ namespace LongSorter
             }
             public static float AngleCorrection40()
             {
-                return LongMode() ? 1000f : 40f;
+                //この角度が大きいと斜めに置く候補が出るので真上に接続しにくい
+                //shiftも押すと真上に繋げやすくする
+                return LongMode() ? (VFInput.shift ? 6f : 1000f) : 40f;
             }
         }
+        public class BuildToolAccess : BuildTool
+        {
+            public static int TmpColsLength()
+            {
+                int result = 0;
+                for (int i = 0; i < _tmp_cols.Length; i++)
+                {
+                    if (_tmp_cols[i] != null)
+                    {
+                        result++;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                return result;
+            }
+            public static Collider[] TmpCols()
+            {
+                return _tmp_cols;
+            }
 
+        }
 
     }
 }
