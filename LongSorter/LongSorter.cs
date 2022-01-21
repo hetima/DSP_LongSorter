@@ -49,8 +49,8 @@ namespace LongSorter
                 {
                     if (ins[i].opcode == OpCodes.Stfld && ins[i].operand is FieldInfo o && o == f)
                     {
-                        //EBuildCondition.TooFar == 11
-                        if (ins[i - 1].opcode == OpCodes.Ldc_I4_S && ins[i - 1].operand is SByte o2 && o2 == 11
+                        //EBuildCondition.TooFar == 13
+                        if (ins[i - 1].opcode == OpCodes.Ldc_I4_S && ins[i - 1].operand is SByte o2 && o2 == 13
                             && (ins[i - 3].opcode == OpCodes.Ble_Un || ins[i - 3].opcode == OpCodes.Ble_Un_S))
                         {
                             patchPos.Add(i - 5);
