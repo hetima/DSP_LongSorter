@@ -22,6 +22,10 @@ If a long sorter is included when copying an object, the length will be reset at
 
 ## Release Notes
 
+### v1.2.1
+
+- Update for 0.9.24.11209 game version
+
 ### v1.2.0
 
 - It is now possible to connect vertically, ignoring the collision detection with the belt / ベルトとの衝突判定を無視して垂直に接続できるようになりました
