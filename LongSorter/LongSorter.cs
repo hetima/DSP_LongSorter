@@ -231,7 +231,16 @@ namespace LongSorter
                 //shiftも押すと真上に繋げやすくする
                 return LongMode() ? (VFInput.shift ? 6f : 1000f) : 40f;
             }
+
+            // since 0.9.27.15466
+            // For now, this method only checks the distance, so simply do not execute it
+            [HarmonyPrefix, HarmonyPatch(typeof(PlanetFactory), "OnInserterBuilt")]
+            public static bool PlanetFactory_OnInserterBuilt_Prefix()
+            {
+                return false;
+            }
         }
+
         public class BuildToolAccess : BuildTool
         {
             public static int TmpColsLength()
