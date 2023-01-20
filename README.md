@@ -8,6 +8,8 @@ If the building candidate is too skewed, you can press the `Shift` key at the sa
 ## Known Issue
 If a long sorter is included when copying an object, the length will be reset at the destination, which may result in an unexpected connection state.
 
+It does not support blueprint.
+
 ---
 
 ## 説明
@@ -18,9 +20,14 @@ If a long sorter is included when copying an object, the length will be reset at
 ## 既知の問題
 オブジェクトのコピー時に長いソーターが含まれていると、コピー先では長さがリセットされ予期しない接続状態になることがあります。
 
+ブループリントには対応していません。
+
 ---
 
 ## Release Notes
+
+### v1.2.2
+- Update for 0.9.27.15466 game version
 
 ### v1.2.1
 
